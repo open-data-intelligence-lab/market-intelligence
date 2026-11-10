@@ -19,27 +19,44 @@ cp .env.example .env   # then add your CENSUS_API_KEY
 
 ## Fetch and validate data
 
+County Business Patterns data for Colorado, Kansas, Missouri and Texas, 2020–2023,
+by two-digit NAICS sector, at state and county level.
+
 ```bash
-# Download CBP totals for KS, TX, MO, CO, validate them, save to data/raw/
+# Download from the Census API, save raw responses to data/raw/cbp/,
+# then clean, validate and write the combined CSVs to data/processed/
 python -m src.ingestion.fetch_census
 
+# Rebuild the CSVs from the saved raw files (no API calls)
+python -m src.ingestion.fetch_census --from-raw
+
 # Re-validate a saved CSV (exits 1 and lists every problem if it fails)
-python -m src.validation.validate_cbp data/raw/cbp_2023_states.csv
+python -m src.validation.validate_cbp data/processed/cbp_state_industry_2020_2023.csv
+python -m src.validation.validate_cbp data/processed/cbp_county_industry_2020_2023.csv
 ```
 
-Validation (`src/validation/validate_cbp.py`) checks:
+| Output | Rows |
+|---|---|
+| `data/processed/cbp_state_industry_2020_2023.csv` | 320 (4 years × 4 states × 20 sectors) |
+| `data/processed/cbp_county_industry_2020_2023.csv` | 31,986 |
 
-- Required columns are present (`NAME`, `state`, `NAICS2017`, `year`, `ESTAB`, `EMP`, `PAYANN`).
-- States are exactly the expected 2-digit FIPS codes (`08`, `20`, `29`, `48`).
-- No duplicate records for the same state, industry, and year.
-- Measures are whole, non-negative numbers.
+Analysis: `notebooks/cbp_industry_analysis.ipynb` (industry mix, largest sectors,
+year-over-year charts, county rankings).
 
-Missing values and Census suppression codes (`D`, `S`, `N`, `X`, and
-sentinels like `-999999999`) become empty (NA). They are never replaced with 0.
-A missing `ESTAB` is an error. A missing `EMP` or `PAYANN` is a warning, because
-Census can withhold these to protect individual businesses.
+Code layout:
 
-Read saved CSVs with `load_cbp_csv()`, not plain `pd.read_csv()`, so codes like `08` keep their leading zero.
+- `src/config.py`: years, states, sectors, paths
+- `src/ingestion/fetch_census.py`: API calls and raw files
+- `src/transformation/clean_cbp.py`: raw API rows → tidy columns
+- `src/validation/validate_cbp.py`: checks; converts measures to numbers
+
+Missing values and Census suppression codes (`D`, `S`, `N`, `X`, and sentinels like
+`-999999999`) become empty (NA). They are never replaced with 0. See
+[docs/data_sources.md](docs/data_sources.md) for every validation check, the Census API
+limitations, and notes on industry classification.
+
+Read saved CSVs with `load_cbp_csv()`, or pass `dtype=str` for `state_fips`,
+`county_fips` and `naics_code`, so codes like `08` keep their leading zero.
 
 ## Run the tests
 

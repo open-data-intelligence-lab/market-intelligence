@@ -2,6 +2,7 @@ numpy
 pandas>=2.0
 python-dotenv
 requests
+matplotlib
 
 # Testing
 pytest>=8.0

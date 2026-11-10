@@ -236,3 +236,5 @@ data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+# macOS folder metadata
+.DS_Store
