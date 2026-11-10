@@ -1,0 +1,37 @@
+{
+  "name": "Market Intelligence | Python + Claude Code",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
+  "mounts": [
+    // Claude Code config + login, persisted across rebuilds.
+    "source=market-intelligence-claude-config,target=/home/vscode/.claude,type=volume",
+    // Linux-only venv. Shadows the host's macOS .venv so the two never collide.
+    "source=market-intelligence-venv,target=/workspaces/${localWorkspaceFolderBasename}/.venv,type=volume"
+  ],
+  "containerEnv": {
+    // Keeps ~/.claude.json (auth state) inside the persisted volume too.
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "charliermarsh.ruff",
+        "anthropic.claude-code"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/workspaces/${localWorkspaceFolderBasename}/.venv/bin/python",
+        "python.terminal.activateEnvironment": true
+      }
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
+}
