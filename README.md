@@ -58,6 +58,21 @@ limitations, and notes on industry classification.
 Read saved CSVs with `load_cbp_csv()`, or pass `dtype=str` for `state_fips`,
 `county_fips` and `naics_code`, so codes like `08` keep their leading zero.
 
+## Dashboard: Market Intelligence Explorer
+
+A Streamlit app with four tabs: Overview, Industry Trends, County Comparison and Data Quality.
+It reads the processed CSVs, so build the data first (see above).
+
+```bash
+streamlit run app/streamlit_app.py
+```
+
+Open http://localhost:8510. The port is set in `.streamlit/config.toml`. In the Dev Container,
+VS Code forwards it automatically (see the **Ports** tab if your computer uses another port).
+
+- `app/streamlit_app.py`: page layout, filters and charts only
+- `src/analytics/kpis.py`: all KPI calculations, following [docs/kpi_definitions.md](docs/kpi_definitions.md)
+
 ## Run the tests
 
 From the project root:
@@ -68,3 +83,5 @@ python -m pytest -v tests/test_validate_cbp.py   # validation tests only
 ```
 
 The tests use sample data and mocked API calls, so they need no API key or network access.
+The reference-value tests in `tests/test_kpis.py` read the processed CSVs and are skipped
+if the data hasn't been built.
