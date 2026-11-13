@@ -1,0 +1,5 @@
+[server]
+# 8501 (Streamlit's default) is often taken by other projects on the host.
+port = 8510
+# Running in a Dev Container: don't try to open a browser.
+headless = true

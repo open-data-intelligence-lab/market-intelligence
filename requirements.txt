@@ -4,5 +4,9 @@ python-dotenv
 requests
 matplotlib
 
+# Dashboard
+streamlit>=1.40
+plotly>=5.0
+
 # Testing
 pytest>=8.0
